@@ -27,8 +27,13 @@ func main() {
     //---* Read the commandline *----------------------------------------------
     flag.Parse()
     
-    fmt.Printf( "VendorId  = %04x\nProductId = %04x\n", vendorId, productId )
-
+    if( vendorId > 0 ) {
+        fmt.Printf( "VendorId  = 0x%04x\n", vendorId )
+    }
+    if( productId > 0 ) {
+        fmt.Printf( "ProductId = 0x%04x\n", productId )
+    }
+ 
     //---* Initalise GoUSB *---------------------------------------------------
     fmt.Println( "Use the Package 'gousb'" )
     
