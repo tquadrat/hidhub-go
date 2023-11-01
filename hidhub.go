@@ -21,11 +21,13 @@ func main() {
     flag.IntVar( &productId, "productId", -1, "The product id of the keyboard to forward" )
 
     flag.Usage = func () {
-        fmt.println( "Usage" )
+        fmt.Println( "Usage" )
     }
-
+    
     //---* Read the commandline *----------------------------------------------
     flag.Parse()
+    
+    fmt.Printf( "VendorId  = %04x\nProductId = %04x\n", vendorId, productId )
 
     //---* Initalise GoUSB *---------------------------------------------------
     fmt.Println( "Use the Package 'gousb'" )
@@ -57,7 +59,7 @@ func main() {
                 for _, ifSetting := range intf.AltSettings {
                     fmt.Printf( "    %s\n", ifSetting )
                     fmt.Printf( "      %s\n", usbid.Classify( ifSetting ) )
-                    fmt.Printf( "      Class: %s SubClass: %s Protocol: %s\n", ifSetting.Class.String(), ifSetting.SubClass.St
+                    fmt.Printf( "      Class: %s SubClass: %s Protocol: %s\n", ifSetting.Class.String(), ifSetting.SubClass.String )
                      for _, end := range ifSetting.Endpoints {
                         fmt.Printf( "      %s\n", end )
                     }
