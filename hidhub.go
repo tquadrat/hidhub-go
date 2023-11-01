@@ -57,7 +57,8 @@ func main() {
                 for _, ifSetting := range intf.AltSettings {
                     fmt.Printf( "    %s\n", ifSetting )
                     fmt.Printf( "      %s\n", usbid.Classify( ifSetting ) )
-                    for _, end := range ifSetting.Endpoints {
+                    fmt.Printf( "      Class: %s SubClass: %s Protocol: %s\n", ifSetting.Class.String(), ifSetting.SubClass.St
+                     for _, end := range ifSetting.Endpoints {
                         fmt.Printf( "      %s\n", end )
                     }
                 }
