@@ -2,6 +2,7 @@ package main
 
 import (
     "fmt"
+    "flag"
     "rsc.io/quote"
     "github.com/sstallion/go-hid"   // package hid
     "github.com/google/gousb"       // package gousb
@@ -11,6 +12,20 @@ import (
 func main() {
     fmt.Println( "Hello, World!" )
     fmt.Println( quote.Go() )
+
+    //---* Define the command line options *-----------------------------------
+    var vendorId int
+    var productId int
+
+    flag.IntVar( &vendorId, "vendorId", -1, "The vendor id of the keyboard to forward" )
+    flag.IntVar( &productId, "productId", -1, "The product id of the keyboard to forward" )
+
+    flag.Usage = func () {
+        fmt.println( "Usage" )
+    }
+
+    //---* Read the commandline *----------------------------------------------
+    flag.Parse()
 
     //---* Initalise GoUSB *---------------------------------------------------
     fmt.Println( "Use the Package 'gousb'" )
@@ -30,9 +45,9 @@ func main() {
         fmt.Printf( "  Descriptionl: %s\n", usbid.Describe( desc ) )
         fmt.Printf( "  Protocol    : %s\n", usbid.Classify( desc ) )
         
- 	// The configurations can be examined from the DeviceDesc, though they 
- 	// can only be set once the device is opened. All configuration 
- 	// references must be closed,  to free up the memory in libusb.
+        // The configurations can be examined from the DeviceDesc, though they 
+ 	    // can only be set once the device is opened. All configuration 
+ 	    // references must be closed,  to free up the memory in libusb.
         for _, cfg := range desc.Configs {
             // This loop just uses more of the built-in and usbid pretty 
             // printing to list/ the USB devices.
