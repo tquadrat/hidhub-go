@@ -15,8 +15,9 @@ When running on a Raspberry Pi computer that is connected as a USB Gagdet
 to a host computer, this program forwards the input from the captured
 keyboard to that host.
 
-The captured keyboard is identified by its Vendor and its Product Id; if 
-not known, it can be obtained through the tool 'lsusb'.
+The captured keyboard is identified by its VendorId and ProductId; if not
+known, it can be obtained through the tool 'lsusb'. Hex numbers can be
+given  with the '0x' prefix.
 `
 	          
 	//---* Define the command line options *-----------------------------------
@@ -25,8 +26,8 @@ not known, it can be obtained through the tool 'lsusb'.
 		productId int
 	)
 
-	flag.IntVar( &vendorId, "vendorId", -1, "The vendor id of the keyboard to forward" )
-	flag.IntVar( &productId, "productId", -1, "The product id of the keyboard to forward" )
+	flag.IntVar( &vendorId, "vendorId", -1, "The VendorId of the keyboard to capture" )
+	flag.IntVar( &productId, "productId", -1, "The ProductId of the keyboard to capture" )
 
 	flag.Usage = func() {
 		fmt.Fprintf( flag.CommandLine.Output(), "\nUsage of %s:\n\n", os.Args[0] )
@@ -37,11 +38,12 @@ not known, it can be obtained through the tool 'lsusb'.
 	//---* Read the commandline *----------------------------------------------
 	flag.Parse()
 
-	if vendorId > 0 {
+	if vendorId > 0 && productId > 0 {
 		fmt.Printf("VendorId  = 0x%04x\n", vendorId)
-	}
-	if productId > 0 {
 		fmt.Printf("ProductId = 0x%04x\n", productId)
+	} else {
+		fmt.Fprintf( flag.CommandLine.Output(), "You need to provide both VendorId and ProductId for the keyboard to capture.\n" )
+		flag.Usage()
 	}
 
 	fmt.Println("------------------------------------------------")
