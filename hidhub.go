@@ -4,13 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"github.com/sstallion/go-hid"   // package hid
+
+	"github.com/sstallion/go-hid" // package hid
 )
 
 func main() {
 	//---* The usage text and other output *-----------------------------------
-	usage := 
-`
+	usage :=
+		`
 When running on a Raspberry Pi computer that is connected as a USB Gagdet 
 to a host computer, this program forwards the input from the captured
 keyboard to that host.
@@ -19,20 +20,20 @@ The captured keyboard is identified by its VendorId and ProductId; if not
 known, it can be obtained through the tool 'lsusb'. Hex numbers can be
 given with the '0x' prefix.
 `
-	          
+
 	//---* Define the command line options *-----------------------------------
 	var (
-		vendorId int
-		productId int
+		vendorId  uint
+		productId uint
 	)
 
-	flag.IntVar( &vendorId, "vendorId", -1, "The VendorId of the keyboard to capture" )
-	flag.IntVar( &productId, "productId", -1, "The ProductId of the keyboard to capture" )
+	flag.UintVar(&vendorId, "vendorId", -1, "The VendorId of the keyboard to capture")
+	flag.UintVar(&productId, "productId", -1, "The ProductId of the keyboard to capture")
 
 	flag.Usage = func() {
-		fmt.Fprintf( flag.CommandLine.Output(), "\nUsage of %s:\n\n", os.Args[0] )
-	    flag.PrintDefaults()
-	    fmt.Fprintln( flag.CommandLine.Output(), usage )
+		fmt.Fprintf(flag.CommandLine.Output(), "\nUsage of %s:\n\n", os.Args[0])
+		flag.PrintDefaults()
+		fmt.Fprintln(flag.CommandLine.Output(), usage)
 	}
 
 	//---* Read the commandline *----------------------------------------------
@@ -42,21 +43,18 @@ given with the '0x' prefix.
 		fmt.Printf("VendorId  = 0x%04x\n", vendorId)
 		fmt.Printf("ProductId = 0x%04x\n", productId)
 	} else {
-		fmt.Fprintf( flag.CommandLine.Output(), "You need to provide both VendorId and ProductId for the keyboard to capture.\n" )
+		fmt.Fprintf(flag.CommandLine.Output(), "You need to provide both VendorId and ProductId for the keyboard to capture.\n")
 		flag.Usage()
-		os.Exit( 2 )
+		os.Exit(2)
 	}
 
-	fmt.Println("------------------------------------------------")
-
 	//---* Initialise HIDAPI *-------------------------------------------------
-	fmt.Println("Use the Package 'hid'")
 	fmt.Println("HIDAPI Version: ", hid.GetVersionStr())
 	hid.Init()
 	defer hid.Exit()
 
 	//---* Dump the connected HID deviced *------------------------------------
-	hid.Enumerate(hid.VendorIDAny, hid.ProductIDAny, func(info *hid.DeviceInfo) error {
+	hid.Enumerate(uint16(vendorId), uint16(productId), func(info *hid.DeviceInfo) error {
 		fmt.Printf("%s: ID %04x:%04x '%s' '%s'\n",
 			info.Path,
 			info.VendorID,
