@@ -17,7 +17,7 @@ keyboard to that host.
 
 The captured keyboard is identified by its VendorId and ProductId; if not
 known, it can be obtained through the tool 'lsusb'. Hex numbers can be
-given  with the '0x' prefix.
+given with the '0x' prefix.
 `
 	          
 	//---* Define the command line options *-----------------------------------
@@ -44,6 +44,7 @@ given  with the '0x' prefix.
 	} else {
 		fmt.Fprintf( flag.CommandLine.Output(), "You need to provide both VendorId and ProductId for the keyboard to capture.\n" )
 		flag.Usage()
+		os.Exit( 2 )
 	}
 
 	fmt.Println("------------------------------------------------")
