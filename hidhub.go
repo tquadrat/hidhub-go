@@ -14,22 +14,24 @@ import (
  * A safe trigger: once the internal counter reaches 0, the given function will
  * be executed and the counter will be reset to the start value.
  */
- type SafeTrigger struct {
-	m_Mutex sync.Mutex
+type SafeTrigger struct {
+	m_Mutex   sync.Mutex
 	m_Counter int
-	m_Start uint
+	m_Start   uint
+	m_Stop    bool
 	m_Trigger func() error
- }
+}
 
-func NewSafeTrigger( start uint, trigger func() error ) (*SafeTrigger, error ) {
+func NewSafeTrigger(start uint, trigger func() error) (*SafeTrigger, error) {
 	retValue := &SafeTrigger{
-		m_Start: start,
+		m_Start:   start,
 		m_Trigger: trigger}
-	retValue.m_Counter = int( start );
+	retValue.m_Counter = int(start)
+	retValue.m_Stop = false
 
 	//---* Done *--------------------------------------------------------------
 	return retValue, nil
-}	//	NewSafeTrigger()
+} //	NewSafeTrigger()
 
 func (t *SafeTrigger) IncrementTrigger() error {
 	t.m_Mutex.Lock()
@@ -39,46 +41,59 @@ func (t *SafeTrigger) IncrementTrigger() error {
 
 	var retValue error
 	retValue = nil
-	
+
 	if t.m_Counter <= 0 {
 		retValue = t.m_Trigger()
-		t.m_Counter = int( t.m_Start )
+		t.m_Counter = int(t.m_Start)
 	}
 
 	//---* Done *--------------------------------------------------------------
 	return retValue
-}	//	IncrementTrigger()
+} //	IncrementTrigger()
+
+func (t *SafeTrigger) ProceedTrigger() bool {
+	t.m_Mutex.Lock()
+	defer t.m_Mutex.Unlock()
+
+	//---* Done *--------------------------------------------------------------
+	return !t.m_Stop
+}
 
 func (t *SafeTrigger) ResetTrigger() error {
 	t.m_Mutex.Lock()
 	defer t.m_Mutex.Unlock()
 
-	t.m_Counter = int( t.m_Start )
+	t.m_Counter = int(t.m_Start)
 
 	//---* Done *--------------------------------------------------------------
 	return nil
-}	//	ResetTrigger()
+} //	ResetTrigger()
+
+func (t *SafeTrigger) StopTrigger() {
+	t.m_Mutex.Lock()
+	defer t.m_Mutex.Unlock()
+
+	t.m_Stop = true
+} //	StopTrigger()
 //-----------------------------------------------------------------------------
 
 /**
  * The trigger function for the heartbeat.
  */
 func HeartbeatFunc() error {
-	fmt.Println( "Heartbeat!" )
-	
+	fmt.Println("Heartbeat!")
+
 	//---* Done *--------------------------------------------------------------
 	return nil
-}	//	HeartbeatFunc()
+} //	HeartbeatFunc()
 
-func Heartbeat( trigger *SafeTrigger ) {
+func Heartbeat(trigger *SafeTrigger) {
 	for true {
-		time.Sleep( time.Second )
+		time.Sleep(time.Second)
 		trigger.IncrementTrigger()
 	}
-}	//	Heartbeat()
+} //	Heartbeat()
 //-----------------------------------------------------------------------------
-
-
 
 func main() {
 	//---* The usage text and other output *-----------------------------------
@@ -137,15 +152,21 @@ given with the '0x' prefix.
 	})
 
 	//---* Start the Heartbeat *-----------------------------------------------
+	message := "Heartbeat!"
+
 	/**
 	 * The heartbeat trigger.
 	 */
-	heartbeatTrigger, _ := NewSafeTrigger( 3, HeartbeatFunc ); 
+	heartbeatTrigger, _ := NewSafeTrigger(3, func() error {
+		fmt.Println(message)
+		return nil
+	})
 
-	go Heartbeat( heartbeatTrigger )
+	go Heartbeat(heartbeatTrigger)
+	defer heartbeatTrigger.StopTrigger()
 
-	time.Sleep( time.Minute )
+	time.Sleep(time.Minute)
 
 	//---* Done *--------------------------------------------------------------
-	fmt.Println( "Done!" )
+	fmt.Println("Done!")
 } //  main()
