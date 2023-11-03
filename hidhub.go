@@ -27,8 +27,8 @@ given with the '0x' prefix.
 		productId uint
 	)
 
-	flag.UintVar(&vendorId, "vendorId", -1, "The VendorId of the keyboard to capture")
-	flag.UintVar(&productId, "productId", -1, "The ProductId of the keyboard to capture")
+	flag.UintVar(&vendorId, "vendorId", 0, "The VendorId of the keyboard to capture")
+	flag.UintVar(&productId, "productId", 0, "The ProductId of the keyboard to capture")
 
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "\nUsage of %s:\n\n", os.Args[0])
