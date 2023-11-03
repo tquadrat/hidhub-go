@@ -4,9 +4,82 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/sstallion/go-hid" // package hid
 )
+
+/**
+ * A safe trigger: once the internal counter reaches 0, the given function will
+ * be executed and the counter will be reset to the start value.
+ */
+ type SafeTrigger struct {
+	m_Mutex sync.Mutex
+	m_Counter int
+	m_Start uint
+	m_Trigger func() error
+ }
+
+func NewSafeTrigger( start uint, trigger func() error ) (*SafeTrigger, error ) {
+	retValue = &SafeTrigger{
+		m_Start: start,
+		m_Trigger: trigger
+	}
+	retValue.m_Counter = start;
+
+	//---* Done *--------------------------------------------------------------
+	return retValue, nil
+}	//	NewSafeTrigger()
+
+func (t *SafeTrigger) IncrementTrigger() error {
+	t.m_Mutex.Lock()
+	defer t.m_Mutex.Unlock()
+
+	--t.m_Counter
+
+	var retValue error
+	retValue = nil
+	
+	if t.m_Counter <= 0 {
+		retValue = t.m_Trigger()
+		t.m_Counter = int( t.m_Start )
+	}
+
+	//---* Done *--------------------------------------------------------------
+	return retValue, nil
+}	//	IncrementTrigger()
+
+func (t *SafeTrigger) ResetTrigger() error {
+	t.m_Mutex.Lock()
+	defer t.m_Mutex.Unlock()
+
+	t.m_Counter = int( t.m_Start )
+
+	//---* Done *--------------------------------------------------------------
+	return nil
+}	//	ResetTrigger()
+//-----------------------------------------------------------------------------
+
+/**
+ * The trigger function for the heartbeat.
+ */
+func HeartbeatFunc() error {
+	fmt.Println( "Heartbeat!" )
+}	//	HeartbeatFunc()
+
+/**
+ * The heartbeat trigger.
+ */
+heartbeatTrigger, _ := NewSafeTrigger( 30, &HeartbeatFunc ); 
+
+func Heartbeat() {
+	time.Sleep( time.Second )
+	heartbeatTrigger.IncrementTrigger()
+}	//	Heartbeat()
+//-----------------------------------------------------------------------------
+
+
 
 func main() {
 	//---* The usage text and other output *-----------------------------------
@@ -63,4 +136,12 @@ given with the '0x' prefix.
 			info.ProductStr)
 		return nil
 	})
+
+	//---* Start the Heartbeat *-----------------------------------------------
+	go Heartbeat()
+
+	time.Sleep( time.Minute )
+
+	//---* Done *--------------------------------------------------------------
+	fmt.Println( "Done!" )
 } //  main()
