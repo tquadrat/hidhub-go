@@ -22,11 +22,10 @@ import (
  }
 
 func NewSafeTrigger( start uint, trigger func() error ) (*SafeTrigger, error ) {
-	retValue = &SafeTrigger{
+	retValue := &SafeTrigger{
 		m_Start: start,
-		m_Trigger: trigger
-	}
-	retValue.m_Counter = start;
+		m_Trigger: trigger}
+	retValue.m_Counter = int( start );
 
 	//---* Done *--------------------------------------------------------------
 	return retValue, nil
@@ -36,7 +35,7 @@ func (t *SafeTrigger) IncrementTrigger() error {
 	t.m_Mutex.Lock()
 	defer t.m_Mutex.Unlock()
 
-	--t.m_Counter
+	t.m_Counter--
 
 	var retValue error
 	retValue = nil
@@ -47,7 +46,7 @@ func (t *SafeTrigger) IncrementTrigger() error {
 	}
 
 	//---* Done *--------------------------------------------------------------
-	return retValue, nil
+	return retValue
 }	//	IncrementTrigger()
 
 func (t *SafeTrigger) ResetTrigger() error {
@@ -66,16 +65,16 @@ func (t *SafeTrigger) ResetTrigger() error {
  */
 func HeartbeatFunc() error {
 	fmt.Println( "Heartbeat!" )
+	
+	//---* Done *--------------------------------------------------------------
+	return nil
 }	//	HeartbeatFunc()
 
-/**
- * The heartbeat trigger.
- */
-heartbeatTrigger, _ := NewSafeTrigger( 30, &HeartbeatFunc ); 
-
-func Heartbeat() {
-	time.Sleep( time.Second )
-	heartbeatTrigger.IncrementTrigger()
+func Heartbeat( trigger *SafeTrigger ) {
+	for true {
+		time.Sleep( time.Second )
+		trigger.IncrementTrigger()
+	}
 }	//	Heartbeat()
 //-----------------------------------------------------------------------------
 
@@ -138,7 +137,12 @@ given with the '0x' prefix.
 	})
 
 	//---* Start the Heartbeat *-----------------------------------------------
-	go Heartbeat()
+	/**
+	 * The heartbeat trigger.
+	 */
+	heartbeatTrigger, _ := NewSafeTrigger( 3, HeartbeatFunc ); 
+
+	go Heartbeat( heartbeatTrigger )
 
 	time.Sleep( time.Minute )
 
