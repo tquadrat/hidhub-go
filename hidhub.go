@@ -33,7 +33,7 @@ func NewSafeTrigger(start uint, trigger func() error) (*SafeTrigger, error) {
 	return retValue, nil
 } //	NewSafeTrigger()
 
-func (t *SafeTrigger) IncrementTrigger() error {
+func (t *SafeTrigger) Increment() error {
 	t.m_Mutex.Lock()
 	defer t.m_Mutex.Unlock()
 
@@ -49,17 +49,17 @@ func (t *SafeTrigger) IncrementTrigger() error {
 
 	//---* Done *--------------------------------------------------------------
 	return retValue
-} //	IncrementTrigger()
+} //	Increment()
 
-func (t *SafeTrigger) ProceedTrigger() bool {
+func (t *SafeTrigger) Proceed() bool {
 	t.m_Mutex.Lock()
 	defer t.m_Mutex.Unlock()
 
 	//---* Done *--------------------------------------------------------------
 	return !t.m_Stop
-}
+} //	Proceed()
 
-func (t *SafeTrigger) ResetTrigger() error {
+func (t *SafeTrigger) Reset() error {
 	t.m_Mutex.Lock()
 	defer t.m_Mutex.Unlock()
 
@@ -67,30 +67,20 @@ func (t *SafeTrigger) ResetTrigger() error {
 
 	//---* Done *--------------------------------------------------------------
 	return nil
-} //	ResetTrigger()
+} //	Reset()
 
-func (t *SafeTrigger) StopTrigger() {
+func (t *SafeTrigger) Stop() {
 	t.m_Mutex.Lock()
 	defer t.m_Mutex.Unlock()
 
 	t.m_Stop = true
-} //	StopTrigger()
+} //	Stop()
 //-----------------------------------------------------------------------------
 
-/**
- * The trigger function for the heartbeat.
- */
-func HeartbeatFunc() error {
-	fmt.Println("Heartbeat!")
-
-	//---* Done *--------------------------------------------------------------
-	return nil
-} //	HeartbeatFunc()
-
 func Heartbeat(trigger *SafeTrigger) {
-	for true {
+	for trigger.Proceed() {
 		time.Sleep(time.Second)
-		trigger.IncrementTrigger()
+		trigger.Increment()
 	}
 } //	Heartbeat()
 //-----------------------------------------------------------------------------
@@ -152,7 +142,7 @@ given with the '0x' prefix.
 	})
 
 	//---* Start the Heartbeat *-----------------------------------------------
-	message := "Heartbeat!"
+	message := "Heartbeat Now!"
 
 	/**
 	 * The heartbeat trigger.
@@ -163,7 +153,7 @@ given with the '0x' prefix.
 	})
 
 	go Heartbeat(heartbeatTrigger)
-	defer heartbeatTrigger.StopTrigger()
+	defer heartbeatTrigger.Stop()
 
 	time.Sleep(time.Minute)
 
