@@ -129,6 +129,9 @@ keyboard to that host.
 The captured keyboard is identified by its VendorId and ProductId; if not
 known, it can be obtained through the tool 'lsusb'. Hex numbers can be
 given with the '0x' prefix.
+
+If this program does not run as 'root', you may have to create a udev rule to
+get access to the device. See for details.
 `
 
 	//---* Define the command line options *-----------------------------------
@@ -192,8 +195,6 @@ given with the '0x' prefix.
 		defer heartbeatTrigger.Stop()
 	}
 
-	time.Sleep(time.Minute)
-
 	//---* Open the captured keyboard *----------------------------------------
 	var device *hid.Device
 	device, status = hid.OpenFirst(uint16(vendorId), uint16(productId))
@@ -208,6 +209,11 @@ given with the '0x' prefix.
 		fmt.Printf("Error: %s\nAborted!\n", status.Error())
 		os.Exit(2)
 	}
+
+	if heartbeatFrequency > 0 {
+		time.Sleep(time.Minute)
+	}
+
 	//---* Done *--------------------------------------------------------------
 	fmt.Println("Done!")
 } //  main()
