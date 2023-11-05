@@ -109,6 +109,17 @@ func ShowDeviceInfo(device *hid.Device) error {
 		fmt.Printf("Bus Type .................: %s\n", deviceInfo.BusType.String()) // Underlying Bus Type
 	}
 
+	if status == nil {
+		for i := 0; true; i++ {
+			s, status = device.GetIndexedStr(i)
+			if status != nil {
+				fmt.Printf("Readng Indexed String % 2d failed: %s\n", i, status.Error())
+				break
+			}
+			fmt.Printf("Indexed String % 2d: %s\n", i, s)
+		}
+	}
+
 	//---* Done *--------------------------------------------------------------
 	return status
 } //	ShowDeviceInfo()
@@ -210,17 +221,17 @@ get access to the device. See for details.
 		os.Exit(2)
 	}
 
-	b := make([]byte,65)
+	b := make([]byte, 65)
 
 	//---* Toggle LED (cmd 0x80). The first byte is the report number (0x0) ---
-	for i := 1; i < 20; i++ { 
-        b[0] = 0x0
-        b[1] = 0x80
-        if _, status := device.Write(b); status != nil {
+	for i := 1; i < 20; i++ {
+		b[0] = 0x0
+		b[1] = 0x80
+		if _, status := device.Write(b); status != nil {
 			fmt.Printf("Error on blinking keyboard: %s\nAborted!\n", status.Error())
 			os.Exit(2)
 		}
-	}	
+	}
 	if heartbeatFrequency > 0 {
 		time.Sleep(time.Minute)
 	}
