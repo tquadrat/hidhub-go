@@ -110,10 +110,12 @@ func ShowDeviceInfo(device *hid.Device) error {
 	}
 
 	if status == nil {
+	    var s string
 		for i := 0; true; i++ {
 			s, status = device.GetIndexedStr(i)
 			if status != nil {
-				fmt.Printf("Readng Indexed String % 2d failed: %s\n", i, status.Error())
+				fmt.Printf("Reading Indexed String % 2d failed: %s\n", i, status.Error())
+				status = nil
 				break
 			}
 			fmt.Printf("Indexed String % 2d: %s\n", i, s)
@@ -231,6 +233,7 @@ get access to the device. See for details.
 			fmt.Printf("Error on blinking keyboard: %s\nAborted!\n", status.Error())
 			os.Exit(2)
 		}
+		time.Sleep(time.Second)
 	}
 	if heartbeatFrequency > 0 {
 		time.Sleep(time.Minute)
