@@ -85,7 +85,40 @@ func Heartbeat(trigger *SafeTrigger) {
 } //	Heartbeat()
 //-----------------------------------------------------------------------------
 
+/**----------------------------------------------------------------------------
+ * Displays the device info (all we can get).
+ *
+ * @param	device The pointer to the device.
+ */
+func ShowDeviceInfo(device *hid.Device) error {
+	var status error = nil
+
+	var deviceInfo *hid.DeviceInfo
+	deviceInfo, status = device.GetDeviceInfo()
+	if status == nil {
+		fmt.Printf("Path .....................: %s\n", deviceInfo.Path)           // Platform-Specific Device Path
+		fmt.Printf("VendorId .................: %04x\n", deviceInfo.VendorID)     // Device Vendor ID
+		fmt.Printf("ProductId ................: %04x\n", deviceInfo.ProductID)    // Device Product ID
+		fmt.Printf("Serial Number ............: %s\n", deviceInfo.SerialNbr)      // Serial Number
+		fmt.Printf("Device Version Number ....: %04x\n", deviceInfo.ReleaseNbr)   // Device Version Number
+		fmt.Printf("Manufacturer String ......: %s\n", deviceInfo.MfrStr)         // Manufacturer String
+		fmt.Printf("Product String ...........: %s\n", deviceInfo.ProductStr)     // Product String
+		fmt.Printf("Usage Page ...............: %04x\n", deviceInfo.UsagePage)    // Usage Page for Device/Interface
+		fmt.Printf("Usage for Device/Interface: %04x\n", deviceInfo.Usage)        // Usage for Device/Interface
+		fmt.Printf("USB Interface Number .....: %d\n", deviceInfo.InterfaceNbr)   // USB Interface Number
+		fmt.Printf("Bus Type .................: %s\n", deviceInfo.BusType.String) // Underlying Bus Type
+	}
+
+	//---* Done *--------------------------------------------------------------
+	return status
+} //	ShowDeviceInfo()
+
+/**----------------------------------------------------------------------------
+ * The program's entry point.
+ */
 func main() {
+	var status error
+
 	//---* The usage text and other output *-----------------------------------
 	usage :=
 		`
@@ -132,7 +165,7 @@ given with the '0x' prefix.
 	hid.Init()
 	defer hid.Exit()
 
-	//---* Dump the connected HID deviced *------------------------------------
+	//---* Dump the connected HID devices *------------------------------------
 	hid.Enumerate(uint16(vendorId), uint16(productId), func(info *hid.DeviceInfo) error {
 		fmt.Printf("%s: ID %04x:%04x '%s' '%s'\n",
 			info.Path,
@@ -161,6 +194,20 @@ given with the '0x' prefix.
 
 	time.Sleep(time.Minute)
 
+	//---* Open the captured keyboard *----------------------------------------
+	var device *hid.Device
+	device, status = hid.OpenFirst(uint16(vendorId), uint16(productId))
+	if status != nil {
+		fmt.Printf("Error: %s\nAborted!\n", status.Error())
+		os.Exit(2)
+	}
+	defer device.Close()
+
+	status = ShowDeviceInfo(device)
+	if status != nil {
+		fmt.Printf("Error: %s\nAborted!\n", status.Error())
+		os.Exit(2)
+	}
 	//---* Done *--------------------------------------------------------------
 	fmt.Println("Done!")
 } //  main()
