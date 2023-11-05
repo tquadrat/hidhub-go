@@ -100,12 +100,14 @@ given with the '0x' prefix.
 
 	//---* Define the command line options *-----------------------------------
 	var (
-		vendorId  uint
-		productId uint
+		vendorId           uint
+		productId          uint
+		heartbeatFrequency uint // The heartbeat frequency in seconds; 0 for no heartbeat
 	)
 
 	flag.UintVar(&vendorId, "vendorId", 0, "The VendorId of the keyboard to capture")
 	flag.UintVar(&productId, "productId", 0, "The ProductId of the keyboard to capture")
+	flag.UintVar(&heartbeatFrequency, "heartbeat", 30, "The heartbeat frequency; set to 0 to switch it off")
 
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "\nUsage of %s:\n\n", os.Args[0])
@@ -142,18 +144,20 @@ given with the '0x' prefix.
 	})
 
 	//---* Start the Heartbeat *-----------------------------------------------
-	message := "Heartbeat Now!"
+	if heartbeatFrequency > 0 {
+		message := "Heartbeat Now!"
 
-	/**
-	 * The heartbeat trigger.
-	 */
-	heartbeatTrigger, _ := NewSafeTrigger(3, func() error {
-		fmt.Println(message)
-		return nil
-	})
+		/**
+		 * The heartbeat trigger.
+		 */
+		heartbeatTrigger, _ := NewSafeTrigger(3, func() error {
+			fmt.Println(message)
+			return nil
+		})
 
-	go Heartbeat(heartbeatTrigger)
-	defer heartbeatTrigger.Stop()
+		go Heartbeat(heartbeatTrigger)
+		defer heartbeatTrigger.Stop()
+	}
 
 	time.Sleep(time.Minute)
 
