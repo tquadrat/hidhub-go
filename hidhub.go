@@ -96,17 +96,17 @@ func ShowDeviceInfo(device *hid.Device) error {
 	var deviceInfo *hid.DeviceInfo
 	deviceInfo, status = device.GetDeviceInfo()
 	if status == nil {
-		fmt.Printf("Path .....................: %s\n", deviceInfo.Path)           // Platform-Specific Device Path
-		fmt.Printf("VendorId .................: %04x\n", deviceInfo.VendorID)     // Device Vendor ID
-		fmt.Printf("ProductId ................: %04x\n", deviceInfo.ProductID)    // Device Product ID
-		fmt.Printf("Serial Number ............: %s\n", deviceInfo.SerialNbr)      // Serial Number
-		fmt.Printf("Device Version Number ....: %04x\n", deviceInfo.ReleaseNbr)   // Device Version Number
-		fmt.Printf("Manufacturer String ......: %s\n", deviceInfo.MfrStr)         // Manufacturer String
-		fmt.Printf("Product String ...........: %s\n", deviceInfo.ProductStr)     // Product String
-		fmt.Printf("Usage Page ...............: %04x\n", deviceInfo.UsagePage)    // Usage Page for Device/Interface
-		fmt.Printf("Usage for Device/Interface: %04x\n", deviceInfo.Usage)        // Usage for Device/Interface
-		fmt.Printf("USB Interface Number .....: %d\n", deviceInfo.InterfaceNbr)   // USB Interface Number
-		fmt.Printf("Bus Type .................: %s\n", deviceInfo.BusType.String) // Underlying Bus Type
+		fmt.Printf("Path .....................: %s\n", deviceInfo.Path)             // Platform-Specific Device Path
+		fmt.Printf("VendorId .................: %04x\n", deviceInfo.VendorID)       // Device Vendor ID
+		fmt.Printf("ProductId ................: %04x\n", deviceInfo.ProductID)      // Device Product ID
+		fmt.Printf("Serial Number ............: %s\n", deviceInfo.SerialNbr)        // Serial Number
+		fmt.Printf("Device Version Number ....: %04x\n", deviceInfo.ReleaseNbr)     // Device Version Number
+		fmt.Printf("Manufacturer String ......: %s\n", deviceInfo.MfrStr)           // Manufacturer String
+		fmt.Printf("Product String ...........: %s\n", deviceInfo.ProductStr)       // Product String
+		fmt.Printf("Usage Page ...............: %04x\n", deviceInfo.UsagePage)      // Usage Page for Device/Interface
+		fmt.Printf("Usage for Device/Interface: %04x\n", deviceInfo.Usage)          // Usage for Device/Interface
+		fmt.Printf("USB Interface Number .....: %d\n", deviceInfo.InterfaceNbr)     // USB Interface Number
+		fmt.Printf("Bus Type .................: %s\n", deviceInfo.BusType.String()) // Underlying Bus Type
 	}
 
 	//---* Done *--------------------------------------------------------------
@@ -204,12 +204,23 @@ get access to the device. See for details.
 	}
 	defer device.Close()
 
-	status = ShowDeviceInfo(device)
-	if status != nil {
+	//status = ShowDeviceInfo(device)
+	if status := ShowDeviceInfo(device); status != nil {
 		fmt.Printf("Error: %s\nAborted!\n", status.Error())
 		os.Exit(2)
 	}
 
+	b := make([]byte,65)
+
+	//---* Toggle LED (cmd 0x80). The first byte is the report number (0x0) ---
+	for i := 1; i < 20; i++ { 
+        b[0] = 0x0
+        b[1] = 0x80
+        if _, status := device.Write(b); status != nil {
+			fmt.Printf("Error on blinking keyboard: %s\nAborted!\n", status.Error())
+			os.Exit(2)
+		}
+	}	
 	if heartbeatFrequency > 0 {
 		time.Sleep(time.Minute)
 	}
