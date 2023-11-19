@@ -109,18 +109,18 @@ func ShowDeviceInfo(device *hid.Device) error {
 		fmt.Printf("Bus Type .................: %s\n", deviceInfo.BusType.String()) // Underlying Bus Type
 	}
 
-	if status == nil {
-	    var s string
-		for i := 0; true; i++ {
-			s, status = device.GetIndexedStr(i)
-			if status != nil {
-				fmt.Printf("Reading Indexed String % 2d failed: %s\n", i, status.Error())
-				status = nil
-				break
-			}
-			fmt.Printf("Indexed String % 2d: %s\n", i, s)
-		}
-	}
+//	if status == nil {
+//	    var s string
+//		for i := 1; true; i++ {
+//			s, status = device.GetIndexedStr(i)
+//			if status != nil {
+//				fmt.Printf("Reading Indexed String % 2d failed: %s\n", i, status.Error())
+//				status = nil
+//				break
+//			}
+//			fmt.Printf("Indexed String % 2d: %s\n", i, s)
+//		}
+//	}
 
 	//---* Done *--------------------------------------------------------------
 	return status
